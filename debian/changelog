@@ -1,0 +1,11 @@
+golang-github-teambition-rrule-go (1.6.0-2) unstable; urgency=medium
+
+  * Source only upload for migration to testing.
+
+ -- Arun Kumar Pariyar <openarungeek@gmail.com>  Thu, 29 Oct 2020 18:42:13 +0545
+
+golang-github-teambition-rrule-go (1.6.0-1) unstable; urgency=medium
+
+  * Initial release (Closes: #969334)
+
+ -- Arun Kumar Pariyar <openarungeek@gmail.com>  Wed, 23 Sep 2020 00:07:01 +0545
