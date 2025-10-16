@@ -1,3 +1,5 @@
+// 2017-2022, Teambition. All rights reserved.
+
 package rrule
 
 import (
@@ -28,11 +30,11 @@ func (set *Set) Recurrence() []string {
 	}
 
 	for _, item := range set.rdate {
-		res = append(res, fmt.Sprintf("RDATE:%s", timeToStr(item)))
+		res = append(res, fmt.Sprintf("RDATE%s", timeToRFCDatetimeStr(item)))
 	}
 
 	for _, item := range set.exdate {
-		res = append(res, fmt.Sprintf("EXDATE:%s", timeToStr(item)))
+		res = append(res, fmt.Sprintf("EXDATE%s", timeToRFCDatetimeStr(item)))
 	}
 	return res
 }
@@ -46,7 +48,7 @@ func (set *Set) DTStart(dtstart time.Time) {
 	}
 }
 
-// GetDTStart gets dtstart for set
+// GetDTStart gets DTSTART for set
 func (set *Set) GetDTStart() time.Time {
 	return set.dtstart
 }

@@ -1,7 +1,8 @@
+// 2017-2022, Teambition. All rights reserved.
+
 package rrule
 
 import (
-	"fmt"
 	"testing"
 	"time"
 )
@@ -11,7 +12,7 @@ func TestRFCRuleToStr(t *testing.T) {
 	dtStart := time.Date(2018, 1, 1, 9, 0, 0, 0, nyLoc)
 
 	r, _ := NewRRule(ROption{Freq: MONTHLY, Dtstart: dtStart})
-	want := "DTSTART;TZID=America/New_York:20180101T090000\nFREQ=MONTHLY"
+	want := "DTSTART;TZID=America/New_York:20180101T090000\nRRULE:FREQ=MONTHLY"
 	if r.String() != want {
 		t.Errorf("Expected RFC string %s, got %v", want, r.String())
 	}
@@ -22,7 +23,7 @@ func TestRFCSetToString(t *testing.T) {
 	dtStart := time.Date(2018, 1, 1, 9, 0, 0, 0, nyLoc)
 
 	r, _ := NewRRule(ROption{Freq: MONTHLY, Dtstart: dtStart})
-	want := "DTSTART;TZID=America/New_York:20180101T090000\nFREQ=MONTHLY"
+	want := "DTSTART;TZID=America/New_York:20180101T090000\nRRULE:FREQ=MONTHLY"
 	if r.String() != want {
 		t.Errorf("Expected RFC string %s, got %v", want, r.String())
 	}
@@ -40,7 +41,7 @@ func TestRFCSetToString(t *testing.T) {
 func TestCompatibility(t *testing.T) {
 	str := "FREQ=WEEKLY;DTSTART=20120201T093000Z;INTERVAL=5;WKST=TU;COUNT=2;UNTIL=20130130T230000Z;BYSETPOS=2;BYMONTH=3;BYYEARDAY=95;BYWEEKNO=1;BYDAY=MO,+2FR;BYHOUR=9;BYMINUTE=30;BYSECOND=0;BYEASTER=-1"
 	r, _ := StrToRRule(str)
-	want := "DTSTART:20120201T093000Z\nFREQ=WEEKLY;INTERVAL=5;WKST=TU;COUNT=2;UNTIL=20130130T230000Z;BYSETPOS=2;BYMONTH=3;BYYEARDAY=95;BYWEEKNO=1;BYDAY=MO,+2FR;BYHOUR=9;BYMINUTE=30;BYSECOND=0;BYEASTER=-1"
+	want := "DTSTART:20120201T093000Z\nRRULE:FREQ=WEEKLY;INTERVAL=5;WKST=TU;COUNT=2;UNTIL=20130130T230000Z;BYSETPOS=2;BYMONTH=3;BYYEARDAY=95;BYWEEKNO=1;BYDAY=MO,+2FR;BYHOUR=9;BYMINUTE=30;BYSECOND=0;BYEASTER=-1"
 	if s := r.String(); s != want {
 		t.Errorf("StrToRRule(%q).String() = %q, want %q", str, s, want)
 	}
@@ -131,14 +132,14 @@ func TestStrToDtStart(t *testing.T) {
 	}
 
 	for _, item := range validCases {
-		if _, e := strToDtStart(item, time.UTC); e != nil {
-			t.Errorf("strToDtStart(%q) error = %s, want nil", item, e.Error())
+		if _, e := StrToDtStart(item, time.UTC); e != nil {
+			t.Errorf("StrToDtStart(%q) error = %s, want nil", item, e.Error())
 		}
 	}
 
 	for _, item := range invalidCases {
-		if _, e := strToDtStart(item, time.UTC); e == nil {
-			t.Errorf("strToDtStart(%q) err = nil, want not nil", item)
+		if _, e := StrToDtStart(item, time.UTC); e == nil {
+			t.Errorf("StrToDtStart(%q) err = nil, want not nil", item)
 		}
 	}
 }
@@ -265,7 +266,7 @@ func TestSetStrCompatibility(t *testing.T) {
 	dtWantTime := time.Date(2018, 1, 1, 9, 0, 0, 0, nyLoc)
 
 	rrule := set.GetRRule()
-	if rrule.String() != "DTSTART;TZID=America/New_York:20180101T090000\nFREQ=WEEKLY;INTERVAL=2;BYDAY=MO,TU" {
+	if rrule.String() != "DTSTART;TZID=America/New_York:20180101T090000\nRRULE:FREQ=WEEKLY;INTERVAL=2;BYDAY=MO,TU" {
 		t.Errorf("Unexpected rrule: %s", rrule.String())
 	}
 	if !dtWantTime.Equal(rrule.dtstart) {
@@ -301,7 +302,7 @@ func TestSetStrCompatibility(t *testing.T) {
 
 	// String to set to string comparison
 	setStr := set.String()
-	setFromSetStr, err := StrToRRuleSet(setStr)
+	setFromSetStr, _ := StrToRRuleSet(setStr)
 
 	if setStr != setFromSetStr.String() {
 		t.Errorf("Expected string output\n %s \nbut got\n %s\n", setStr, setFromSetStr.String())
@@ -331,7 +332,7 @@ func TestSetParseLocalTimes(t *testing.T) {
 			"DTSTART;TZID=Europe/Moscow:20180220T090000",
 			"RDATE;VALUE=DATE-TIME:20180223T100000",
 		}
-		expected := "DTSTART;TZID=Europe/Moscow:20180220T090000\nRDATE:20180223T070000Z"
+		expected := "DTSTART;TZID=Europe/Moscow:20180220T090000\nRDATE;TZID=Europe/Moscow:20180223T100000"
 		s, err := StrSliceToRRuleSet(input)
 		if err != nil {
 			t.Error(err)
@@ -340,7 +341,7 @@ func TestSetParseLocalTimes(t *testing.T) {
 		sRRule := s.String()
 
 		if sRRule != expected {
-			t.Error(fmt.Sprintf("DTSTART output not valid. Expected: \n%s \n Got: \n%s", expected, sRRule))
+			t.Errorf("DTSTART output not valid. Expected: \n%s \n Got: \n%s", expected, sRRule)
 		}
 	})
 
@@ -358,7 +359,7 @@ func TestSetParseLocalTimes(t *testing.T) {
 		sRRule := s.String()
 
 		if sRRule != expected {
-			t.Error(fmt.Sprintf("DTSTART output not valid. Expected: \n%s \n Got: \n%s", expected, sRRule))
+			t.Errorf("DTSTART output not valid. Expected: \n%s \n Got: \n%s", expected, sRRule)
 		}
 	})
 
@@ -378,17 +379,34 @@ func TestSetParseLocalTimes(t *testing.T) {
 }
 
 func TestRDateValueDateStr(t *testing.T) {
-	input := []string{
-		"RDATE;VALUE=DATE:20180223",
-	}
-	s, err := StrSliceToRRuleSet(input)
-	if err != nil {
-		t.Error(err)
-	}
-	d := s.GetRDate()[0]
-	if !d.Equal(time.Date(2018, 02, 23, 0, 0, 0, 0, time.UTC)) {
-		t.Error("Bad time parsed: ", d)
-	}
+	t.Run("DefaultToUTC", func(t *testing.T) {
+		input := []string{
+			"RDATE;VALUE=DATE:20180223",
+		}
+		s, err := StrSliceToRRuleSet(input)
+		if err != nil {
+			t.Error(err)
+		}
+		d := s.GetRDate()[0]
+		if !d.Equal(time.Date(2018, 02, 23, 0, 0, 0, 0, time.UTC)) {
+			t.Error("Bad time parsed: ", d)
+		}
+	})
+
+	t.Run("PreserveExplicitTimezone", func(t *testing.T) {
+		denver, _ := time.LoadLocation("America/Denver")
+		input := []string{
+			"RDATE;VALUE=DATE;TZID=America/Denver:20180223",
+		}
+		s, err := StrSliceToRRuleSet(input)
+		if err != nil {
+			t.Error(err)
+		}
+		d := s.GetRDate()[0]
+		if !d.Equal(time.Date(2018, 02, 23, 0, 0, 0, 0, denver)) {
+			t.Error("Bad time parsed: ", d)
+		}
+	})
 }
 
 func TestStrSetEmptySliceParse(t *testing.T) {

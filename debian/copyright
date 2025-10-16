@@ -4,11 +4,11 @@ Upstream-Contact: Teambition <dev@teambition.com>
 Source: https://github.com/teambition/rrule-go
 
 Files: *
-Copyright: 2016 Teambition <dev@teambition.com>
+Copyright: 2017-2022 Teambition <dev@teambition.com>
 License: Expat
 
 Files: debian/*
-Copyright: 2020 Arun Kumar Pariyar <openarungeek@gmail.com>
+Copyright: 2020-2023 Arun Kumar Pariyar <arun@debian.org>
 License: Expat
 
 License: Expat

@@ -1,3 +1,5 @@
+// 2017-2022, Teambition. All rights reserved.
+
 package rrule
 
 import (
@@ -38,7 +40,7 @@ func (f Frequency) String() string {
 		"HOURLY", "MINUTELY", "SECONDLY"}[f]
 }
 
-func strToFreq(str string) (Frequency, error) {
+func StrToFreq(str string) (Frequency, error) {
 	freqMap := map[string]Frequency{
 		"YEARLY": YEARLY, "MONTHLY": MONTHLY, "WEEKLY": WEEKLY, "DAILY": DAILY,
 		"HOURLY": HOURLY, "MINUTELY": MINUTELY, "SECONDLY": SECONDLY,
@@ -117,15 +119,16 @@ func strToInts(value string) ([]int, error) {
 }
 
 // String returns RRULE string with DTSTART if exists. e.g.
-//   DTSTART;TZID=America/New_York:19970105T083000
-//   RRULE:FREQ=YEARLY;INTERVAL=2;BYMONTH=1;BYDAY=SU;BYHOUR=8,9;BYMINUTE=30
+//
+//	DTSTART;TZID=America/New_York:19970105T083000
+//	RRULE:FREQ=YEARLY;INTERVAL=2;BYMONTH=1;BYDAY=SU;BYHOUR=8,9;BYMINUTE=30
 func (option *ROption) String() string {
 	str := option.RRuleString()
 	if option.Dtstart.IsZero() {
 		return str
 	}
 
-	return fmt.Sprintf("DTSTART%s\n%s", timeToRFCDatetimeStr(option.Dtstart), str)
+	return fmt.Sprintf("DTSTART%s\nRRULE:%s", timeToRFCDatetimeStr(option.Dtstart), str)
 }
 
 // RRuleString returns RRULE string exclude DTSTART
@@ -196,12 +199,13 @@ func StrToROptionInLocation(rfcString string, loc *time.Location) (*ROption, err
 			return nil, fmt.Errorf("expect DTSTART but: %s", firstName)
 		}
 
-		result.Dtstart, err = strToDtStart(dtstartStr[len(firstName)+1:], time.UTC)
+		result.Dtstart, err = StrToDtStart(dtstartStr[len(firstName)+1:], loc)
 		if err != nil {
-			return nil, fmt.Errorf("strToDtStart failed: %s", err)
+			return nil, fmt.Errorf("StrToDtStart failed: %s", err)
 		}
 	}
 
+	rruleStr = strings.TrimPrefix(rruleStr, "RRULE:")
 	for _, attr := range strings.Split(rruleStr, ";") {
 		keyValue := strings.Split(attr, "=")
 		if len(keyValue) != 2 {
@@ -214,7 +218,7 @@ func StrToROptionInLocation(rfcString string, loc *time.Location) (*ROption, err
 		var e error
 		switch key {
 		case "FREQ":
-			result.Freq, e = strToFreq(value)
+			result.Freq, e = StrToFreq(value)
 			freqSet = true
 		case "DTSTART":
 			result.Dtstart, e = strToTimeInLoc(value, loc)
@@ -312,11 +316,10 @@ func StrSliceToRRuleSetInLoc(ss []string, defaultLoc *time.Location) (*Set, erro
 	if err != nil {
 		return nil, err
 	}
-
 	if firstName == "DTSTART" {
-		dt, err := strToDtStart(ss[0][len(firstName)+1:], defaultLoc)
+		dt, err := StrToDtStart(ss[0][len(firstName)+1:], defaultLoc)
 		if err != nil {
-			return nil, fmt.Errorf("strToDtStart failed: %v", err)
+			return nil, fmt.Errorf("StrToDtStart failed: %v", err)
 		}
 		// default location should be taken from DTSTART property to correctly
 		// parse local times met in RDATE,EXDATE and other rules
@@ -335,7 +338,7 @@ func StrSliceToRRuleSetInLoc(ss []string, defaultLoc *time.Location) (*Set, erro
 
 		switch name {
 		case "RRULE":
-			rOpt, err := StrToROption(rule)
+			rOpt, err := StrToROptionInLocation(rule, defaultLoc)
 			if err != nil {
 				return nil, fmt.Errorf("StrToROption failed: %v", err)
 			}
@@ -435,9 +438,9 @@ func processRRuleName(line string) (string, error) {
 	return name, nil
 }
 
-// strToDtStart accepts string with format: "(TZID={timezone}:)?{time}" and parses it to a date
+// StrToDtStart accepts string with format: "(TZID={timezone}:)?{time}" and parses it to a date
 // may be used to parse DTSTART rules, without the DTSTART; part.
-func strToDtStart(str string, defaultLoc *time.Location) (time.Time, error) {
+func StrToDtStart(str string, defaultLoc *time.Location) (time.Time, error) {
 	tmp := strings.Split(str, ":")
 	if len(tmp) > 2 || len(tmp) == 0 {
 		return time.Time{}, fmt.Errorf("bad format")
