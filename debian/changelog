@@ -1,3 +1,31 @@
+golang-github-teambition-rrule-go (1.8.1-2) unstable; urgency=medium
+
+  * Team upload.
+  [ Aurelien Jarno ]
+  * debian/control: Add Build-Depends and Depends on tzdata-legacy.
+    Closes: #1086270.
+
+ -- Santiago Vila <sanvila@debian.org>  Thu, 07 Nov 2024 23:50:00 +0100
+
+golang-github-teambition-rrule-go (1.8.1-1) unstable; urgency=medium
+
+  * New upstream release 1.8.1.
+  * debian/control:
+    + Bump Standards version to 4.6.2.
+    + Add tzdata to build dependency. (Closes: #1027372)
+  * debian/copyright: Update copyright years.
+  * debian/rules: Drop example from DH_GOLANG_EXCLUDES.
+
+ -- Arun Kumar Pariyar <arun@debian.org>  Thu, 05 Jan 2023 21:28:51 +0545
+
+golang-github-teambition-rrule-go (1.6.0-3) unstable; urgency=medium
+
+  [ Debian Janitor ]
+  * Set upstream metadata fields: Bug-Database, Bug-Submit.
+  * Update standards version to 4.6.0, no changes needed.
+
+ -- Jelmer Vernooĳ <jelmer@debian.org>  Tue, 13 Dec 2022 20:52:25 +0000
+
 golang-github-teambition-rrule-go (1.6.0-2) unstable; urgency=medium
 
   * Source only upload for migration to testing.
